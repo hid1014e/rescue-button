@@ -1,26 +1,54 @@
 @import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap");
 
+/* ゲーム風デザイン用カラー・グラデ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0f0a1a;
+  --foreground: #f5f0ff;
+  --game-bg: linear-gradient(135deg, #1a0a2e 0%, #16213e 30%, #0f3460 60%, #e94560 100%);
+  --game-bg-soft: linear-gradient(180deg, #2d1b4e 0%, #1a1a2e 50%, #16213e 100%);
+  --game-card: rgba(255, 255, 255, 0.95);
+  --game-card-border: rgba(233, 69, 96, 0.4);
+  --game-accent: #e94560;
+  --game-accent-2: #0ea5e9;
+  --game-glow: 0 0 20px rgba(233, 69, 96, 0.3);
+  --game-text-bright: #f5f0ff;
+  --game-text-muted: #a78bfa;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: "M PLUS Rounded 1c", "Hiragino Sans", sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--game-bg-soft);
+  background-attachment: fixed;
+  color: var(--game-text-bright);
+  font-family: "M PLUS Rounded 1c", "Hiragino Sans", sans-serif;
+  min-height: 100vh;
+}
+
+/* ゲーム風カード共通 */
+.game-card {
+  background: var(--game-card);
+  border: 2px solid var(--game-card-border);
+  border-radius: 1.5rem;
+  box-shadow: var(--game-glow), 0 8px 32px rgba(0, 0, 0, 0.3);
+  color: #1a1a2e;
+}
+
+/* タイトル用グラデ文字（必要ならクラスで使用） */
+.game-title {
+  background: linear-gradient(90deg, #fbbf24, #e94560, #0ea5e9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 800;
+}
+
+/* メインCTAボタン風の光る枠 */
+.game-btn-glow {
+  box-shadow: 0 0 16px rgba(233, 69, 96, 0.5);
 }

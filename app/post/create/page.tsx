@@ -1,9 +1,10 @@
 'use client';
 
-import { Box, Container, VStack, Heading, Text, Button, useColorModeValue, Textarea, FormControl, FormLabel } from '@chakra-ui/react';
+import { Box, Container, VStack, Heading, Text, Button, Textarea, Field, Badge } from '@chakra-ui/react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { supabase } from '@/lib/supabase';
+import { setLastResponsesUrl } from '@/lib/rescue-storage';
 
 const THEME_LABELS: Record<string, string> = {
   'work-study': '仕事・勉強の悩み',
@@ -13,17 +14,20 @@ const THEME_LABELS: Record<string, string> = {
   'general': 'とにかく励ましてほしい',
 };
 
-export default function CreatePostPage() {
+function CreatePostContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const theme = searchParams?.get('theme') || '';
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const bgColor = useColorModeValue('gray.50', 'gray.900');
-  const cardBg = useColorModeValue('white', 'gray.800');
+  const bgGradient = 'linear-gradient(180deg, #2d1b4e 0%, #1a1a2e 50%, #16213e 100%)';
 
   const generateAnonymousId = () => {
     return `user_${Math.random().toString(36).substring(2, 9)}`;
+  };
+
+  const generateViewToken = () => {
+    return `vt_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`;
   };
 
   const handleSubmit = async () => {
@@ -32,18 +36,28 @@ export default function CreatePostPage() {
     try {
       setIsSubmitting(true);
       const anonymousId = generateAnonymousId();
+      const viewToken = generateViewToken();
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('rescue_posts')
         .insert({
           theme,
           content: content.trim(),
           anonymous_id: anonymousId,
-        });
+          view_token: viewToken,
+        })
+        .select('id')
+        .single();
 
       if (error) throw error;
+      if (!data?.id) throw new Error('投稿IDが取得できませんでした');
 
-      router.push(`/posts?theme=${theme}`);
+      const responsesUrl = `/post/${data.id}/responses?token=${encodeURIComponent(viewToken)}`;
+      setLastResponsesUrl(responsesUrl);
+      // ストレージ書き込みを確実に反映してから遷移
+      await new Promise((r) => requestAnimationFrame(r));
+      await new Promise((r) => setTimeout(r, 0));
+      router.push(responsesUrl);
     } catch (error) {
       console.error('投稿エラー:', error);
       alert('投稿に失敗しました');
@@ -54,30 +68,47 @@ export default function CreatePostPage() {
 
   if (!theme) {
     return (
-      <Box minH="100vh" bg={bgColor} py={12}>
+      <Box minH="100vh" bg={bgGradient} backgroundAttachment="fixed" py={12}>
         <Container maxW="container.md">
-          <Text>テーマが選択されていません</Text>
-          <Button onClick={() => router.push('/theme-select')}>テーマを選ぶ</Button>
+          <VStack gap={4}>
+            <Text color="gray.300">テーマが選択されていません</Text>
+            <Button colorScheme="pink" borderRadius="full" onClick={() => router.push('/theme-select')}>テーマを選ぶ</Button>
+          </VStack>
         </Container>
       </Box>
     );
   }
 
   return (
-    <Box minH="100vh" bg={bgColor} py={12}>
+    <Box minH="100vh" bg={bgGradient} backgroundAttachment="fixed" py={12}>
       <Container maxW="container.md">
-        <VStack spacing={8} align="stretch">
-          <VStack spacing={4} textAlign="center">
-            <Heading as="h1" size="xl" color="blue.600">
+        <VStack gap={8} align="stretch">
+          <VStack gap={4} textAlign="center">
+            <Heading
+              as="h1"
+              size="xl"
+              fontWeight="800"
+              bg="linear-gradient(90deg, #fbbf24, #e94560)"
+              bgClip="text"
+              color="transparent"
+              style={{ WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
+            >
               新しい投稿を作る
             </Heading>
-            <Badge colorScheme="blue">{THEME_LABELS[theme]}</Badge>
+            <Badge colorScheme="pink" borderRadius="full" px={4} py={1}>{THEME_LABELS[theme]}</Badge>
           </VStack>
 
-          <Box p={8} bg={cardBg} borderRadius="lg" boxShadow="md">
-            <VStack spacing={6} align="stretch">
-              <FormControl>
-                <FormLabel>あなたの気持ちを書いてください</FormLabel>
+          <Box
+            p={8}
+            bg="white"
+            borderRadius="2xl"
+            borderWidth="2px"
+            borderColor="pink.400"
+            boxShadow="0 0 24px rgba(233, 69, 96, 0.2), 0 8px 32px rgba(0,0,0,0.2)"
+          >
+            <VStack gap={6} align="stretch">
+              <Field.Root>
+                <Field.Label>あなたの気持ちを書いてください</Field.Label>
                 <Textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
@@ -85,22 +116,28 @@ export default function CreatePostPage() {
                   rows={8}
                   maxLength={500}
                 />
-                <Text fontSize="sm" color="gray.500" mt={2}>
-                  {content.length} / 500文字
-                </Text>
-              </FormControl>
+                <Field.HelperText>
+                  <Text fontSize="sm" color="gray.500" mt={2}>
+                    {content.length} / 500文字
+                  </Text>
+                </Field.HelperText>
+              </Field.Root>
 
               <Button
-                colorScheme="blue"
+                colorScheme="pink"
                 size="lg"
+                borderRadius="full"
+                boxShadow="0 0 16px rgba(233, 69, 96, 0.4)"
                 onClick={handleSubmit}
-                isLoading={isSubmitting}
-                isDisabled={!content.trim()}
+                loading={isSubmitting}
+                disabled={!content.trim()}
+                _hover={!content.trim() ? {} : { transform: 'scale(1.02)' }}
+                transition="all 0.2s"
               >
                 投稿する
               </Button>
 
-              <Button variant="ghost" onClick={() => router.push(`/posts?theme=${theme}`)}>
+              <Button variant="ghost" colorScheme="gray" onClick={() => router.push(`/posts?theme=${theme}`)}>
                 キャンセル
               </Button>
             </VStack>
@@ -108,5 +145,17 @@ export default function CreatePostPage() {
         </VStack>
       </Container>
     </Box>
+  );
+}
+
+export default function CreatePostPage() {
+  return (
+    <Suspense fallback={
+      <Box minH="100vh" bg="linear-gradient(180deg, #2d1b4e 0%, #1a1a2e 50%, #16213e 100%)" backgroundAttachment="fixed" py={12} display="flex" alignItems="center" justifyContent="center">
+        <Text color="gray.300">読み込み中...</Text>
+      </Box>
+    }>
+      <CreatePostContent />
+    </Suspense>
   );
 }

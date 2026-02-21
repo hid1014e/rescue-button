@@ -1,21 +1,24 @@
 -- 落ち込みレスキューボタン用テーブル定義
 
--- 投稿テーブル
+-- 投稿テーブル（view_token: 投稿者だけが「届いた応援一覧」を開く用）
 CREATE TABLE IF NOT EXISTS rescue_posts (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   theme text NOT NULL CHECK (theme IN ('work-study', 'relationships', 'future-anxiety', 'failure', 'general')),
   content text NOT NULL CHECK (char_length(content) <= 500),
   anonymous_id text NOT NULL,
+  view_token text UNIQUE,
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
 
--- 励ましメッセージテーブル
+-- 励ましメッセージテーブル（reaction: ワンタップリアクション 3択）
 CREATE TABLE IF NOT EXISTS rescue_encouragements (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   post_id uuid NOT NULL REFERENCES rescue_posts(id) ON DELETE CASCADE,
   message text NOT NULL CHECK (char_length(message) <= 300),
   anonymous_id text NOT NULL,
+  reaction text CHECK (reaction IN ('a_bit_better', 'very_encouraged', 'still_struggling')),
+  reacted_at timestamptz,
   created_at timestamptz DEFAULT now()
 );
 

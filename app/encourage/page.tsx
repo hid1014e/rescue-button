@@ -1,8 +1,8 @@
 'use client';
 
-import { Box, Container, VStack, Heading, Text, Button, useColorModeValue, Textarea, FormControl, FormLabel, Alert, AlertIcon } from '@chakra-ui/react';
+import { Box, Container, VStack, Heading, Text, Button, Textarea, Field } from '@chakra-ui/react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { supabase } from '@/lib/supabase';
 
 const ENCOURAGEMENT_TEMPLATES = [
@@ -19,7 +19,7 @@ interface Post {
   anonymous_id: string;
 }
 
-export default function EncouragePage() {
+function EncourageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const postId = searchParams?.get('postId') || '';
@@ -27,8 +27,7 @@ export default function EncouragePage() {
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const bgColor = useColorModeValue('gray.50', 'gray.900');
-  const cardBg = useColorModeValue('white', 'gray.800');
+  const bgGradient = 'linear-gradient(180deg, #2d1b4e 0%, #1a1a2e 50%, #16213e 100%)';
 
   useEffect(() => {
     if (postId) {
@@ -84,9 +83,9 @@ export default function EncouragePage() {
 
   if (isLoading) {
     return (
-      <Box minH="100vh" bg={bgColor} py={12}>
+      <Box minH="100vh" bg={bgGradient} backgroundAttachment="fixed" py={12}>
         <Container maxW="container.md">
-          <Text textAlign="center">読み込み中...</Text>
+          <Text textAlign="center" color="gray.400">読み込み中...</Text>
         </Container>
       </Box>
     );
@@ -94,7 +93,7 @@ export default function EncouragePage() {
 
   if (!post) {
     return (
-      <Box minH="100vh" bg={bgColor} py={12}>
+      <Box minH="100vh" bg={bgGradient} backgroundAttachment="fixed" py={12}>
         <Container maxW="container.md">
           <Text>投稿が見つかりません</Text>
           <Button onClick={() => router.push('/theme-select')}>トップに戻る</Button>
@@ -104,38 +103,50 @@ export default function EncouragePage() {
   }
 
   return (
-    <Box minH="100vh" bg={bgColor} py={12}>
+    <Box minH="100vh" bg={bgGradient} backgroundAttachment="fixed" py={12}>
       <Container maxW="container.md">
-        <VStack spacing={8} align="stretch">
-          <VStack spacing={4} textAlign="center">
-            <Heading as="h1" size="xl" color="blue.600">
+        <VStack gap={8} align="stretch">
+          <VStack gap={4} textAlign="center">
+            <Heading
+              as="h1"
+              size="xl"
+              fontWeight="800"
+              bg="linear-gradient(90deg, #0ea5e9, #e94560)"
+              bgClip="text"
+              color="transparent"
+              style={{ WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
+            >
               励ましを送る
             </Heading>
-            <Text fontSize="md" color="gray.600">
+            <Text fontSize="md" color="gray.300">
               {post.anonymous_id}さんの投稿に、励ましを送りましょう
             </Text>
           </VStack>
 
-          <Box p={8} bg={cardBg} borderRadius="lg" boxShadow="md">
-            <VStack spacing={6} align="stretch">
-              <Box p={4} bg="blue.50" borderRadius="md">
-                <Text fontWeight="bold" mb={2}>投稿内容</Text>
+          <Box
+            p={8}
+            bg="white"
+            borderRadius="2xl"
+            borderWidth="2px"
+            borderColor="green.400"
+            boxShadow="0 0 24px rgba(34, 197, 94, 0.2), 0 8px 32px rgba(0,0,0,0.2)"
+          >
+            <VStack gap={6} align="stretch">
+              <Box p={4} bg="cyan.50" borderRadius="xl" borderWidth="1px" borderColor="cyan.200">
+                <Text fontWeight="bold" mb={2} color="gray.700">投稿内容</Text>
                 <Text color="gray.700">{post.content}</Text>
               </Box>
 
-              <Alert status="info" borderRadius="md">
-                <AlertIcon />
-                <Box>
-                  <Text fontWeight="bold">相手が前向きになれるような、温かい言葉を選びましょう。</Text>
-                  <Text fontSize="sm" mt={1}>
-                    「頑張って！」だけでなく、「〇〇なところ、素敵ですね」など、具体的な共感も良いでしょう。
-                  </Text>
-                </Box>
-              </Alert>
+              <Box p={4} bg="blue.50" borderRadius="xl" borderWidth="2px" borderColor="blue.200">
+                <Text fontWeight="bold" color="blue.800">相手が前向きになれるような、温かい言葉を選びましょう。</Text>
+                <Text fontSize="sm" mt={1} color="gray.700">
+                  「頑張って！」だけでなく、「〇〇なところ、素敵ですね」など、具体的な共感も良いでしょう。
+                </Text>
+              </Box>
 
-              <FormControl>
-                <FormLabel>励ましメッセージ</FormLabel>
-                <VStack spacing={2} align="stretch" mb={4}>
+              <Field.Root>
+                <Field.Label>励ましメッセージ</Field.Label>
+                <VStack gap={2} align="stretch" mb={4}>
                   <Text fontSize="sm" color="gray.600">テンプレートから選ぶ（クリックで入力欄に反映）:</Text>
                   <Box display="flex" flexWrap="wrap" gap={2}>
                     {ENCOURAGEMENT_TEMPLATES.map((template) => (
@@ -143,6 +154,8 @@ export default function EncouragePage() {
                         key={template}
                         size="sm"
                         variant="outline"
+                        colorScheme="cyan"
+                        borderRadius="full"
                         onClick={() => handleTemplateClick(template)}
                       >
                         {template}
@@ -157,22 +170,28 @@ export default function EncouragePage() {
                   rows={6}
                   maxLength={300}
                 />
-                <Text fontSize="sm" color="gray.500" mt={2}>
-                  {message.length} / 300文字
-                </Text>
-              </FormControl>
+                <Field.HelperText>
+                  <Text fontSize="sm" color="gray.500" mt={2}>
+                    {message.length} / 300文字
+                  </Text>
+                </Field.HelperText>
+              </Field.Root>
 
               <Button
                 colorScheme="green"
                 size="lg"
+                borderRadius="full"
+                boxShadow="0 0 16px rgba(34, 197, 94, 0.4)"
                 onClick={handleSubmit}
-                isLoading={isSubmitting}
-                isDisabled={!message.trim()}
+                loading={isSubmitting}
+                disabled={!message.trim()}
+                _hover={!message.trim() ? {} : { transform: 'scale(1.02)' }}
+                transition="all 0.2s"
               >
                 応援メッセージを送る
               </Button>
 
-              <Button variant="ghost" onClick={() => router.back()}>
+              <Button variant="ghost" colorScheme="gray" onClick={() => router.back()}>
                 戻る
               </Button>
             </VStack>
@@ -180,5 +199,17 @@ export default function EncouragePage() {
         </VStack>
       </Container>
     </Box>
+  );
+}
+
+export default function EncouragePage() {
+  return (
+    <Suspense fallback={
+      <Box minH="100vh" bg="linear-gradient(180deg, #2d1b4e 0%, #1a1a2e 50%, #16213e 100%)" backgroundAttachment="fixed" py={12} display="flex" alignItems="center" justifyContent="center">
+        <Text color="gray.400">読み込み中...</Text>
+      </Box>
+    }>
+      <EncourageContent />
+    </Suspense>
   );
 }
