@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>落ち込みレスキューボタン</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(180deg, #2d1b4e 0%, #1a1a2e 50%, #16213e 100%);
+      font-family: "M PLUS Rounded 1c", "Hiragino Sans", sans-serif;
+      padding: 24px;
+    }
+    h1 {
+      color: #fbbf24;
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+    p {
+      color: rgba(255,255,255,0.8);
+      font-size: 0.9rem;
+      margin-bottom: 32px;
+      text-align: center;
+    }
+    a {
+      display: inline-block;
+      padding: 20px 48px;
+      background: linear-gradient(135deg, #e94560, #fbbf24);
+      color: #fff;
+      font-size: 1.25rem;
+      font-weight: bold;
+      text-decoration: none;
+      border-radius: 9999px;
+      box-shadow: 0 4px 24px rgba(233, 69, 96, 0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    a:hover, a:focus {
+      transform: scale(1.05);
+      box-shadow: 0 6px 28px rgba(233, 69, 96, 0.5);
+    }
+    a:active { transform: scale(0.98); }
+  </style>
+</head>
+<body>
+  <h1>落ち込みレスキューボタン</h1>
+  <p>タップしてゲームを開く</p>
+  <a href="https://rescue-button-hides-projects-19f80db4.vercel.app/" target="_blank" rel="noopener">ゲームを始める</a>
+</body>
+</html>

@@ -145,7 +145,9 @@ function EncourageContent() {
               </Box>
 
               <Field.Root>
-                <Field.Label>励ましメッセージ</Field.Label>
+                <Field.Label color="gray.800" fontWeight="600" fontSize="md">
+                  励ましメッセージ
+                </Field.Label>
                 <VStack gap={2} align="stretch" mb={4}>
                   <Text fontSize="sm" color="gray.600">テンプレートから選ぶ（クリックで入力欄に反映）:</Text>
                   <Box display="flex" flexWrap="wrap" gap={2}>
@@ -169,6 +171,10 @@ function EncourageContent() {
                   placeholder="温かい励ましの言葉を書いてください..."
                   rows={6}
                   maxLength={300}
+                  color="gray.900"
+                  _placeholder={{ color: 'gray.500' }}
+                  borderColor="gray.300"
+                  _focus={{ borderColor: 'green.400', boxShadow: '0 0 0 1px var(--chakra-colors-green-400)' }}
                 />
                 <Field.HelperText>
                   <Text fontSize="sm" color="gray.500" mt={2}>

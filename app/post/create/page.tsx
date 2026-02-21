@@ -108,13 +108,19 @@ function CreatePostContent() {
           >
             <VStack gap={6} align="stretch">
               <Field.Root>
-                <Field.Label>あなたの気持ちを書いてください</Field.Label>
+                <Field.Label color="gray.800" fontWeight="600" fontSize="md">
+                  あなたの気持ちを書いてください
+                </Field.Label>
                 <Textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   placeholder="今、どんな気持ちですか？どんなことで落ち込んでいますか？"
                   rows={8}
                   maxLength={500}
+                  color="gray.900"
+                  _placeholder={{ color: 'gray.500' }}
+                  borderColor="gray.300"
+                  _focus={{ borderColor: 'pink.400', boxShadow: '0 0 0 1px var(--chakra-colors-pink-400)' }}
                 />
                 <Field.HelperText>
                   <Text fontSize="sm" color="gray.500" mt={2}>

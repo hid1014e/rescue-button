@@ -71,7 +71,7 @@ function CompleteContent() {
                       <br />
                       7日間のお試しで、あなたの可能性を広げましょう！
                     </Text>
-                    <Link href={process.env.NEXT_PUBLIC_BUDDYSHARE_URL || 'https://myapp.vercel.app'} target="_blank" rel="noopener">
+                    <Link href={process.env.NEXT_PUBLIC_BUDDYSHARE_URL || 'https://myapp-hides-projects-19f80db4.vercel.app/'} target="_blank" rel="noopener">
                       <Button colorScheme="purple" size="lg" w="full">
                         BuddyShareの7日間お試しへ
                       </Button>
